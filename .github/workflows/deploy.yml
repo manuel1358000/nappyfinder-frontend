@@ -19,11 +19,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: ./app-test
+        working-directory: ./nappy-finder-app
         run: npm install
 
       - name: Build Angular app
-        working-directory: ./app-test
+        working-directory: ./nappy-finder-app
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             npm run build --configuration=production
