@@ -41,7 +41,7 @@ jobs:
       - name: Check if S3 bucket exists
         id: check_bucket
         run: |
-          BUCKET_NAME="angular-website-terraform-${{ github.ref_name }}"
+          BUCKET_NAME="nappy-finder-app-${{ github.ref_name }}"
           if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
             echo "Bucket $BUCKET_NAME already exists"
             echo "EXISTS=true" >> $GITHUB_ENV
@@ -71,4 +71,4 @@ jobs:
 
       - name: Sync S3 bucket
         run: |
-          aws s3 sync ./nappy-finder-app/dist/nappyfinder-frontend/browser s3://nappy-finder-app-terraform-${{ github.ref_name }}/ --delete
+          aws s3 sync ./nappy-finder-app/dist/nappyfinder-frontend/browser s3://nappy-finder-app-${{ github.ref_name }}/ --delete
