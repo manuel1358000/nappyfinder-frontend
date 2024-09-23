@@ -1,0 +1,74 @@
+name: Deploy Website App
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: ./app-test
+        run: npm install
+
+      - name: Build Angular app
+        working-directory: ./app-test
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            npm run build --configuration=production
+          else
+            npm run build --configuration=development
+          fi
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Check if S3 bucket exists
+        id: check_bucket
+        run: |
+          BUCKET_NAME="angular-website-terraform-${{ github.ref_name }}"
+          if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "Bucket $BUCKET_NAME already exists"
+            echo "EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Bucket $BUCKET_NAME does not exist"
+            echo "EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Terraform Init
+        working-directory: ./terraform/environments/${{ github.ref_name }}
+        run: |
+          terraform init
+
+      - name: Terraform Plan
+        working-directory: ./terraform/environments/${{ github.ref_name }}
+        if: env.EXISTS == 'false'
+        run: |
+          terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
+          terraform plan
+
+      - name: Terraform Apply
+        working-directory: ./terraform/environments/${{ github.ref_name }}
+        if: env.EXISTS == 'false' 
+        run: |
+          terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
+          terraform apply -auto-approve
+
+      - name: Sync S3 bucket
+        run: |
+          aws s3 sync ./nappy-finder-app/dist/nappyfinder-frontend/browser s3://nappy-finder-app-terraform-${{ github.ref_name }}/ --delete
