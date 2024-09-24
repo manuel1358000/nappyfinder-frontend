@@ -11,7 +11,7 @@ resource "aws_s3_bucket_website_configuration" "nappy_finder_app_bucket_website"
   }
 
   error_document {
-    key = "error.html"
+    key = "index.html"
   }
 
   depends_on = [aws_s3_bucket.nappy_finder_app_bucket]
