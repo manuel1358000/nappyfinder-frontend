@@ -13,6 +13,8 @@ resource "aws_s3_bucket_website_configuration" "nappy_finder_app_bucket_website"
   error_document {
     key = "error.html"
   }
+
+  depends_on = [aws_s3_bucket.nappy_finder_app_bucket]
 }
 
 //3.Manages S3 bucket-level Public Access Block configuration
