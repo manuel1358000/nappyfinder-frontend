@@ -19,11 +19,11 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: ./app-test
+        working-directory: ./nappy-finder-app
         run: npm install
 
       - name: Build Angular app
-        working-directory: ./app-test
+        working-directory: ./nappy-finder-app
         run: |
           if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             npm run build --configuration=production
@@ -41,7 +41,7 @@ jobs:
       - name: Check if S3 bucket exists
         id: check_bucket
         run: |
-          BUCKET_NAME="angular-website-terraform-${{ github.ref_name }}"
+          BUCKET_NAME="nappy-finder-app-${{ github.ref_name }}"
           if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
             echo "Bucket $BUCKET_NAME already exists"
             echo "EXISTS=true" >> $GITHUB_ENV
@@ -57,18 +57,16 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ./terraform/environments/${{ github.ref_name }}
-        if: env.EXISTS == 'false'
         run: |
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
           terraform plan
 
       - name: Terraform Apply
         working-directory: ./terraform/environments/${{ github.ref_name }}
-        if: env.EXISTS == 'false' 
         run: |
           terraform workspace select ${{ github.ref_name }} || terraform workspace new ${{ github.ref_name }}
           terraform apply -auto-approve
 
       - name: Sync S3 bucket
         run: |
-          aws s3 sync ./nappy-finder-app/dist/nappyfinder-frontend/browser s3://nappy-finder-app-terraform-${{ github.ref_name }}/ --delete
+          aws s3 sync ./nappy-finder-app/dist/nappyfinder-frontend/browser s3://nappy-finder-app-${{ github.ref_name }}/ --delete

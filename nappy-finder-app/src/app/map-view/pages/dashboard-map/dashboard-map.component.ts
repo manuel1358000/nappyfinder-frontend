@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from '../../../../environments/environment'; // Asegúrate de que la ruta sea correcta
 
 @Component({
   selector: 'app-dashboard-map',
@@ -8,5 +9,7 @@ import { Component } from '@angular/core';
   styleUrl: './dashboard-map.component.scss'
 })
 export class DashboardMapComponent {
+
+  title:string =environment.apiUrl ;
 
 }

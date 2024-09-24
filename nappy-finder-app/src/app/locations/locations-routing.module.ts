@@ -9,7 +9,7 @@ const routes: Routes = [
     loadComponent: ()=>LocationsListComponent
   },
   {
-    path: 'locations-detail:id',
+    path: 'locations-details/:id',
     loadComponent: ()=> LocationsDetailComponent
   }
 ];
