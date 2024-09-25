@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./nappy-finder-app
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build Angular app
         working-directory: ./nappy-finder-app
